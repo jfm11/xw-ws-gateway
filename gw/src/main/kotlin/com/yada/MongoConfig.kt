@@ -14,7 +14,11 @@ import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguratio
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
 
-
+/**
+ * mongo数据库配置
+ * @param dbName 读取配置文件中 yada.db.mongo.db 的属性，如果为空，则使用"yada_auth"
+ * @param url 读取配置文件中 yada.db.mongo.url 的属性；如果为空，则使用"mongodb://localhost/?replicaSet=rs"
+ */
 @Configuration
 @EnableReactiveMongoRepositories
 open class MongoConfig constructor(
@@ -23,6 +27,8 @@ open class MongoConfig constructor(
         @Value("\${yada.db.mongo.url:mongodb://localhost/?replicaSet=rs}")
         private val url: String
 ) : AbstractReactiveMongoConfiguration() {
+// TODO 改成spring boot自动化配置
+
     override fun reactiveMongoClient() = mongoClient()
 
     override fun getDatabaseName() = dbName
@@ -33,7 +39,9 @@ open class MongoConfig constructor(
     open fun mongoClient(): MongoClient = MongoClients.create(ConnectionString(url))
 
     @Bean
-    open fun transactionManager(factory: ReactiveMongoDatabaseFactory) = ReactiveMongoTransactionManager(factory)
+    open fun transactionManager(factory: ReactiveMongoDatabaseFactory): ReactiveMongoTransactionManager {
+        return ReactiveMongoTransactionManager(factory)
+    }
 
     @Bean
     open fun messageSource(): MessageSource? {
