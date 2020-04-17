@@ -49,20 +49,49 @@ class LoggerDelegate : ReadOnlyProperty<Any?, Logger> {
  */
 private const val TOKEN_EXPIRE_INTERVAL: Long = 1 * 60 * 60 // 单位：秒
 
+/**
+ * 日期工具
+ */
 @Component
 class TimeUtil {
     fun getCurrentDate() = Date()
 }
 
+/**
+ * Jwt生成工具
+ * @param secret 生成jwt的密钥
+ * @param timeUtil 日期工具
+ */
 @Component
-class JwtTokenUtil @Autowired constructor(private @Value("\${jwt.secret:yadajwt}") val secret: String, private val timeUtil: TimeUtil) {
+class JwtTokenUtil @Autowired constructor(@Value("\${jwt.secret:yadajwt}") private val secret: String, private val timeUtil: TimeUtil) {
+    /**
+     * 获取超时日期
+     */
     private fun Date.getExpirationDate() = Date(this.time + TOKEN_EXPIRE_INTERVAL * 1000)
+
+    /**
+     * 基于HS512签名算法生成token
+     */
     private fun JwtBuilder.generateToken() = this.signWith(SignatureAlgorithm.HS512, secret).compact()
+
+    /**
+     * 清理cookie中的token
+     */
     private val emptyCookie = ResponseCookie.from("token", "").path(getPath(false)).maxAge(0).build()
+
+    /**
+     * 清理管理员用户cookie中的token
+     */
     private val adminEmptyCookie = ResponseCookie.from("token", "").path(getPath(true)).maxAge(0).build()
+    // TODO 管理员用户和普通用户的path为什么是不一样的，有什么用途
+    /**
+     * 获取空的cookie
+     */
+    fun getEmptyCookie(entity: AuthInfo): ResponseCookie = if (entity.isAdmin) adminEmptyCookie else emptyCookie
 
-    fun getEmptyCookie(entity: AuthInfo): ResponseCookie = if (entity.isAdmin == true) adminEmptyCookie else emptyCookie
-
+    /**
+     * 根据token获取用户认证信息
+     */
     fun getEntity(token: String) =
             try {
                 AuthInfo(Jwts.parser().setSigningKey(secret).parseClaimsJws(token).body)
@@ -72,39 +101,77 @@ class JwtTokenUtil @Autowired constructor(private @Value("\${jwt.secret:yadajwt}
                 null
             }
 
+    /**
+     * 根据认证信息生成一段时间有效的token
+     * @param entity 认证信息
+     * @param currentDate 当前日期
+     */
     fun generateToken(entity: AuthInfo, currentDate: Date = timeUtil.getCurrentDate()): String =
             Jwts.builder().setClaims(entity).setIssuedAt(currentDate).setExpiration(currentDate.getExpirationDate()).generateToken()
 
+    /**
+     * 根据认证信息生成一段时间有效的cookie
+     * @param entity 认证信息
+     * @param currentDate 当前日期
+     */
     fun generateCookie(entity: AuthInfo, currentDate: Date = timeUtil.getCurrentDate()): ResponseCookie {
         val token = generateToken(entity, currentDate)
         return generateCookie(token, Duration.ofMillis(entity.expiration.time - currentDate.time), getPath(entity.isAdmin))
     }
 
+    /**
+     * 重新生成cookie
+     * @param entity 认证信息
+     * @param currentDate 当前日期
+     */
     fun renewCookie(entity: AuthInfo, currentDate: Date = timeUtil.getCurrentDate()): ResponseCookie = generateCookie(
             Jwts.builder().setClaims(entity).setIssuedAt(currentDate).setExpiration(currentDate.getExpirationDate()).generateToken(),
             Duration.ofMillis(TOKEN_EXPIRE_INTERVAL * 1000),
             getPath(entity.isAdmin))
 
+    /**
+     * 生成浏览器的cookie
+     * @param token jwt
+     * @param maxAge 最大有效时间
+     * @param path cookie的path属性
+     */
     private fun generateCookie(token: String, maxAge: Duration, path: String) = ResponseCookie.from("token", token)
             .maxAge(maxAge)
             .path(path)
             .build()
 
+    /**
+     * 根据权限获取路径
+     * @param isAdmin 是否是管理员用户
+     */
     private fun getPath(isAdmin: Boolean?) = if (isAdmin == true) "/admin" else "/"
 
 
 }
 
+/**
+ * 扩展 ServerRequest 对象属性 authInfo，值存储在attributes中，key为authInfo。
+ * @see ServerRequest
+ */
 var ServerRequest.authInfo: AuthInfo
     get() = this.attributes()["authInfo"]!! as AuthInfo
     set(value) {
         this.attributes()["authInfo"] = value
     }
 
+/**
+ * 扩展 ServerRequest 对象只读属性 token，存储在cookie中，key为token
+ */
 val ServerRequest.token: String?
     get() = this.cookies()["token"]?.run { this[0]?.value }
 
+/**
+ * 扩展 ServerWebExchange 对象只读属性 token，存储在request属性对cookie中，key为token
+ */
 val ServerWebExchange.token: String?
     get() = this.request.cookies["token"]?.run { this[0]?.value }
 
+/**
+ * 路径解析工具实例
+ */
 val pathPatternParser = PathPatternParser()
