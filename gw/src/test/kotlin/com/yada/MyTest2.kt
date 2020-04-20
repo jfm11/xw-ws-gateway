@@ -12,6 +12,7 @@ import reactor.test.StepVerifier
 @SpringBootTest
 class MyTest2 @Autowired constructor(private val orgSvc: IOrgService) {
     private val logger by LoggerDelegate()
+
     @Test
     fun t() {
         val m = orgSvc.createOrUpdate(Org("00", "org 00"))

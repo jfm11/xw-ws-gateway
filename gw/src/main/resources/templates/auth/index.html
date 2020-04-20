@@ -35,7 +35,8 @@
             margin: 0 0 2rem;
             text-align: center;
         }
-        .alert-error-box{
+
+        .alert-error-box {
             margin-bottom: 10px;
             padding: 4px 10px;
             background-color: #fff4f0;
@@ -56,14 +57,17 @@
             box-sizing: border-box;
             transition: .5s;
         }
-        .form-input+span{
+
+        .form-input + span {
             display: inline-block;
             padding-top: 10px;
             color: red;
         }
-        .form-input.alert-error{
-            border-color:red;
+
+        .form-input.alert-error {
+            border-color: red;
         }
+
         .form-btn {
             background: #007fff;
             color: #fff;
@@ -81,7 +85,7 @@
     <script th:src="@{/js/jquery-3.1.1.js}"></script>
     <script th:src="@{/js/jquery.validate-1.19.1.js}"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $("#loginForm").validate({
                 rules: {
                     username: {
@@ -112,8 +116,10 @@
             });
         });
     </script>
-    <script th:if="${@environment.getProperty('yada.recaptcha') == 'recaptcha.Google'}" src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <script th:if="${@environment.getProperty('yada.recaptcha') == 'recaptcha.GoogleCN'}" src="https://recaptcha.net/recaptcha/api.js" async defer></script>
+    <script th:if="${@environment.getProperty('yada.recaptcha') == 'recaptcha.Google'}"
+            src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script th:if="${@environment.getProperty('yada.recaptcha') == 'recaptcha.GoogleCN'}"
+            src="https://recaptcha.net/recaptcha/api.js" async defer></script>
 </head>
 <body>
 <form id="loginForm" method="post" class="wrap" th:object="${loginForm}">
@@ -128,7 +134,8 @@
             <input type="password" id="password" th:field="*{password}" class="form-input" placeholder="请输入密码">
             <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
         </div>
-        <div th:if="${@environment.getProperty('yada.recaptcha') == 'recaptcha.GoogleCN' || @environment.getProperty('yada.recaptcha') == 'recaptcha.Google'}" class="g-recaptcha" data-sitekey="6Leu2NsUAAAAAFttLaiyEKDu9yLgrYJhN77Ou1ge"></div>
+        <div th:if="${@environment.getProperty('yada.recaptcha') == 'recaptcha.GoogleCN' || @environment.getProperty('yada.recaptcha') == 'recaptcha.Google'}"
+             class="g-recaptcha" data-sitekey="6Leu2NsUAAAAAFttLaiyEKDu9yLgrYJhN77Ou1ge"></div>
         <div class="login-btn">
             <input type="submit" class="form-input form-btn" th:value="#{login.submit}">
         </div>
