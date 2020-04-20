@@ -10,6 +10,10 @@ import org.springframework.web.reactive.function.server.ServerResponse.ok
 import org.springframework.web.reactive.function.server.body
 import reactor.core.publisher.Mono
 
+/**
+ * 机构处理者
+ * @param orgService 机构接口服务
+ */
 @Component
 class OrgHandler @Autowired constructor(private val orgService: IOrgService) {
     fun getTree(req: ServerRequest): Mono<ServerResponse> = ok().body(orgService.getTree(req.queryParam("redirect").orElse("")))

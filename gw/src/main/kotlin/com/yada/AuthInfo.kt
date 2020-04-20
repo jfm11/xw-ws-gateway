@@ -8,8 +8,17 @@ import io.jsonwebtoken.Claims
 import io.jsonwebtoken.impl.DefaultClaims
 import java.security.Principal
 
+/**
+ * 授权信息
+ * @param claims jwt的声明
+ */
 class AuthInfo(private val claims: Claims) : Claims by claims, Principal {
     companion object {
+        /**
+         * 创建授权信息
+         * @param user 用户
+         * @param resList 资源列表
+         */
         fun create(user: User, resList: List<Res>) = AuthInfo().apply {
             isAdmin = false
             this.user = user
@@ -17,6 +26,9 @@ class AuthInfo(private val claims: Claims) : Claims by claims, Principal {
             this.username = user.id
         }
 
+        /**
+         * 创建一个管理员授权信息
+         */
         fun create() = AuthInfo().apply { isAdmin = true }
     }
 

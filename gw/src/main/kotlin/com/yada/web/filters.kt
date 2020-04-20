@@ -72,6 +72,10 @@ class AuthAdminApiHandlerFilter @Autowired constructor(jwtUtil: JwtTokenUtil) : 
 
 }
 
+/**
+ * 白名单
+ * @param whitelist 白名单IP地址列表
+ */
 @Component
 class WhitelistHandlerFilter @Autowired constructor(@Value("\${yada.admin.ipWhitelist:}") private val whitelist: List<String>) : Filter {
     override fun invoke(request: ServerRequest, next: Next): Mono<ServerResponse> =

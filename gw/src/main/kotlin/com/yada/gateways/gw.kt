@@ -22,13 +22,18 @@ import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
 import java.util.function.Predicate
 
+/**
+ * 应用路由
+ */
 @Component
 class AppRoutePredicateFactory : AbstractRoutePredicateFactory<AppRoutePredicateFactory.Config>(Config::class.java) {
 
     override fun shortcutFieldOrder(): MutableList<String> = mutableListOf("path")
 
     override fun apply(config: Config): Predicate<ServerWebExchange> {
+        // 应用路径前缀
         val pathPrefix = config.path
+        // 应用路径匹配规则
         val pathPattern = pathPatternParser.parse("$pathPrefix/**")
 
         return object : GatewayPredicate {
@@ -51,6 +56,9 @@ class AppRoutePredicateFactory : AbstractRoutePredicateFactory<AppRoutePredicate
     }
 }
 
+/**
+ * 授权网关
+ */
 @Component
 class AuthGatewayFilterFactory @Autowired constructor(private val jwtTokenUtil: JwtTokenUtil)
     : AbstractGatewayFilterFactory<AuthGatewayFilterFactory.Config>(Config::class.java) {
@@ -94,6 +102,9 @@ class AuthGatewayFilterFactory @Autowired constructor(private val jwtTokenUtil: 
     class Config
 }
 
+/**
+ * 服务路由
+ */
 @Component
 class SvcRoutePredicateFactory : AbstractRoutePredicateFactory<SvcRoutePredicateFactory.Config>(Config::class.java) {
 
@@ -125,6 +136,9 @@ class SvcRoutePredicateFactory : AbstractRoutePredicateFactory<SvcRoutePredicate
     }
 }
 
+/**
+ * 授权API网关
+ */
 @Component
 class AuthApiGatewayFilterFactory @Autowired constructor(private val jwtTokenUtil: JwtTokenUtil)
     : AbstractGatewayFilterFactory<AuthApiGatewayFilterFactory.Config>(Config::class.java) {

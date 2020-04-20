@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.router
 
+/**
+ * 授权路由配置
+ */
 @Configuration
 open class AuthRouterConfig @Autowired constructor(
         private val authHandler: AuthHandler,
@@ -47,6 +50,9 @@ open class AuthRouterConfig @Autowired constructor(
     }
 }
 
+/**
+ * 管理员授权路由配置
+ */
 @Configuration
 open class AdminAuthRouterConfig @Autowired constructor(
         private val adminAuthHandler: AdminAuthHandler,
@@ -70,6 +76,9 @@ open class AdminAuthRouterConfig @Autowired constructor(
     }
 }
 
+/**
+ * 管理员API路由配置
+ */
 @Configuration
 open class AdminApiRouterConfig @Autowired constructor(
         private val roleHandler: RoleHandler,
@@ -113,3 +122,4 @@ open class AdminApiRouterConfig @Autowired constructor(
         filter(authAdminApiFilter)
     }
 }
+// TODO 内部API路由配置
