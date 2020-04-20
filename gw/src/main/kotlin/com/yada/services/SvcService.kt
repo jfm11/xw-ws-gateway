@@ -19,21 +19,29 @@ interface ISvcService {
 
     /**
      * 根据ID获取服务
+     * @param id 服务ID
+     * @return 服务实体
      */
     fun get(id: String): Mono<Svc>
 
     /**
      * 创建或更新服务
+     * @param svc 服务实体
+     * @return 服务实体
      */
     fun createOrUpdate(svc: Svc): Mono<Svc>
 
     /**
      * 修改服务ID
+     * @param oldId 旧服务ID
+     * @param newId 新服务ID
+     * @return 新服务实体
      */
     fun changeId(oldId: String, newId: String): Mono<Svc>
 
     /**
      * 删除服务
+     * @param id 服务ID
      */
     fun delete(id: String): Mono<Void>
 }

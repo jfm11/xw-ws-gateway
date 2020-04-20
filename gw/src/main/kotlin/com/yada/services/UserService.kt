@@ -15,21 +15,28 @@ import reactor.core.publisher.Mono
 interface IUserService {
     /**
      * 通过用户ID获取用户
+     * @param id 用户ID
+     * @return 用户
      */
     fun get(id: String): Mono<User>
 
     /**
      * 通过机构ID获取用户
+     * @param orgId 机构ID
+     * @return 用户
      */
     fun getByOrgId(orgId: String): Flux<User>
 
     /**
      * 创建或更新用户
+     * @param user 用户实体
+     * @return 用户实体
      */
     fun createOrUpdate(user: User): Mono<User>
 
     /**
      * 通过用户ID删除用户
+     * @param id 用户ID
      */
     fun delete(id: String): Mono<Void>
 
