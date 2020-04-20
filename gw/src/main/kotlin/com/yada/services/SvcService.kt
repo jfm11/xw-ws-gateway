@@ -8,11 +8,33 @@ import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
+/**
+ * 服务接口
+ */
 interface ISvcService {
+    /**
+     * 获取所有服务
+     */
     fun getAll(): Flux<Svc>
+
+    /**
+     * 根据ID获取服务
+     */
     fun get(id: String): Mono<Svc>
+
+    /**
+     * 创建或更新服务
+     */
     fun createOrUpdate(svc: Svc): Mono<Svc>
+
+    /**
+     * 修改服务ID
+     */
     fun changeId(oldId: String, newId: String): Mono<Svc>
+
+    /**
+     * 删除服务
+     */
     fun delete(id: String): Mono<Void>
 }
 
@@ -27,11 +49,20 @@ open class SvcService @Autowired constructor(private val repo: SvcRepository, pr
 
     @Transactional
     override fun changeId(oldId: String, newId: String): Mono<Svc> =
-            repo.findById(oldId).flatMap { repo.save(it.copy(id = newId)) }.flatMap { repo.deleteById(oldId).then(Mono.just(it)) }
+            repo.findById(oldId)
+                    // 复制原服务信息并新增
+                    .flatMap { repo.save(it.copy(id = newId)) }
+                    // 删除原服务信息
+                    .flatMap { repo.deleteById(oldId).then(Mono.just(it)) }
 
     @Transactional
-    override fun delete(id: String): Mono<Void> = roleSvc.getAll().flatMap { role ->
-        val set = role.svcs.filter { it.id != id }.toSet()
-        if (set.size != role.svcs.size) roleSvc.createOrUpdate(role.copy(svcs = set)) else Mono.empty()
-    }.then(repo.deleteById(id))
+    override fun delete(id: String): Mono<Void> = roleSvc.getAll()
+            .flatMap { role ->
+                // 根据查询到的角色，得到不包含当前ID的服务
+                val set = role.svcs.filter { it.id != id }.toSet()
+                // 如果新服务数量和旧服务数量不相等，则更新角色对应的资源
+                if (set.size != role.svcs.size) roleSvc.createOrUpdate(role.copy(svcs = set)) else Mono.empty()
+            }
+            // 角色清理完毕后，删除该服务
+            .then(repo.deleteById(id))
 }
